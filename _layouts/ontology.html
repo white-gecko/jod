@@ -68,6 +68,28 @@ rdf_prefix_path: "_data/prefixes.pref"
     ' %}
 {% assign countDatatypePropertiesResultSet = page.rdf | sparql_query: countDatatypePropertiesQuery %}
 
+{% assign rdfPropertiesQuery = '
+    SELECT DISTINCT ?subject
+    WHERE
+    {
+        ?subject a ?class .
+        FILTER ( ?class IN (rdf:Property) )
+        FILTER isIRI(?subject)
+    }
+    ORDER BY ?label' %}
+{% assign rdfPropertiesResultset = page.rdf | sparql_query: rdfPropertiesQuery %}
+
+{% assign countRdfPropertiesQuery = '
+    SELECT DISTINCT (COUNT(?subject) as ?rdfProperties)
+    WHERE
+    {
+        ?subject a ?class .
+        FILTER ( ?class IN (rdf:Property) )
+        FILTER isIRI(?subject)
+    }
+    ' %}
+{% assign countRdfPropertiesResultSet = page.rdf | sparql_query: countRdfPropertiesQuery %}
+
 <div class="container-fluid">
   <div class="row">
       {% include navigation.html iri = result.subject.iri %}
@@ -76,20 +98,33 @@ rdf_prefix_path: "_data/prefixes.pref"
       {% include ontology-head.html iri = result.subject.iri %}
 
       <h2 id="classes">Overview</h2>
+      {% if classesResultset %}
       <h2 id="classes">Classes</h2>
       {% for result in classesResultset %}
           <p>{% include class-card.html iri = result.subject.iri %}</p>
       {% endfor %}
+      {% endif %}
 
+      {% if objectPropertiesResultset %}
       <h2 id="objectProperties">Object Properties</h2>
       {% for result in objectPropertiesResultset %}
           <p>{% include class-card.html iri = result.subject.iri %}</p>
       {% endfor %}
+      {% endif %}
 
+      {% if datatypePropertiesResultset %}
       <h2 id="datatypeProperties">Datatype Properties</h2>
       {% for result in datatypePropertiesResultset %}
           <p>{% include class-card.html iri = result.subject.iri %}</p>
       {% endfor %}
+      {% endif %}
+
+      {% if rdfPropertiesResultset %}
+      <h2 id="rdfProperties">RDF Properties</h2>
+      {% for result in rdfPropertiesResultset %}
+          <p>{% include class-card.html iri = result.subject.iri %}</p>
+      {% endfor %}
+      {% endif %}
 
       </main>
 
